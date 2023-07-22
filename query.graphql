@@ -1,0 +1,21 @@
+
+
+query ProgramSet($id: ID!) {
+  programSet(id: $id) {
+    title
+    id
+    items {
+      nodes {
+        title
+        summary
+        id
+        publishDate
+        audios {
+          title
+          url
+          mimeType
+        }
+      }
+    }
+  }
+}

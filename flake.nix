@@ -24,8 +24,7 @@
           rustc = toolchain;
         };
 
-        buildInputs = with pkgs; [
-        ];
+
       in
       rec {
         # For `nix build` & `nix run`:
@@ -33,8 +32,11 @@
           {
             src = ./.;
             nativeBuildInputs = with pkgs; [
+              pkg-config
             ];
-
+            buildInputs = with pkgs; [
+              openssl
+            ];
 
 
           };
@@ -44,6 +46,11 @@
           {
             nativeBuildInputs = with pkgs; [
               toolchain
+              pkg-config
+            ];
+
+            buildInputs = with pkgs; [
+              openssl
             ];
 
 

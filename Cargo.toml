@@ -7,3 +7,10 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.69"
+atom_syndication = "0.12.1"
+chrono = "0.4.26"
+graphql_client = "0.13.0"
+reqwest = { version = "0.11.18", features = ["json"] }
+serde = { version = "1.0.174", features = ["derive"] }
+serde_json = "1.0.103"
+tokio = { version = "1.29.1", features = ["full"] }
