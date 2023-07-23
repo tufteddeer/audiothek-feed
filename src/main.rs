@@ -87,10 +87,12 @@ async fn get_atom_feed(Path(id): Path<String>) -> axum::response::Response<Strin
         .map(node_to_episode)
         .collect();
 
+    let modified = DateTime::parse_from_rfc3339(&program_set.last_item_modified.unwrap()).unwrap();
     let atom_feed = FeedBuilder::default()
         .title(program_set.title)
         .entries(entries)
         .id(program_set.id)
+        .updated(modified)
         .build();
 
     axum::response::Response::new(atom_feed.to_string())

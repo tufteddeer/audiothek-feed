@@ -4,6 +4,8 @@ query ProgramSet($id: ID!) {
   programSet(id: $id) {
     title
     id
+    lastItemModified
+
     items {
       nodes {
         title
