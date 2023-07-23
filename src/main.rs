@@ -69,6 +69,7 @@ fn node_to_episode(item: &ProgramSetProgramSetItemsNodes) -> Entry {
         content: Some(content),
         links,
         published: Some(published),
+        updated: published,
         ..Entry::default()
     }
 }
