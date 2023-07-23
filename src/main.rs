@@ -5,6 +5,7 @@ use graphql_client::{GraphQLQuery, Response};
 use program_set::{ProgramSetProgramSetItemsNodes, ProgramSetProgramSetItemsNodesAudios};
 
 type Datetime = String;
+#[allow(clippy::upper_case_acronyms)]
 type URL = String;
 
 #[derive(GraphQLQuery)]
