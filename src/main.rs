@@ -1,4 +1,5 @@
 use atom_syndication::{Content, Entry, FeedBuilder, Link, Text};
+use axum::{extract::Path, routing::get, Router};
 use chrono::DateTime;
 use graphql_client::{GraphQLQuery, Response};
 use program_set::{ProgramSetProgramSetItemsNodes, ProgramSetProgramSetItemsNodesAudios};
@@ -72,14 +73,12 @@ fn node_to_episode(item: &ProgramSetProgramSetItemsNodes) -> Entry {
     }
 }
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    let program_set = fetch_show(program_set::Variables {
-        id: "12642475".to_string(),
-    })
-    .await?
-    .program_set
-    .unwrap();
+async fn get_atom_feed(Path(id): Path<String>) -> axum::response::Response<String> {
+    let program_set = fetch_show(program_set::Variables { id })
+        .await
+        .unwrap()
+        .program_set
+        .unwrap();
 
     let entries: Vec<Entry> = program_set
         .items
@@ -94,9 +93,20 @@ async fn main() -> anyhow::Result<()> {
         .id(program_set.id)
         .build();
 
-    let file = std::fs::File::create("atom.xml")?;
+    axum::response::Response::new(atom_feed.to_string())
+}
 
-    atom_feed.write_to(file).unwrap();
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let app = Router::new().route("/feed/:id", get(get_atom_feed));
+
+    let socket = "0.0.0.0:3000";
+
+    println!("Listening on http://{socket}");
+    axum::Server::bind(&socket.parse().unwrap())
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 
     Ok(())
 }
