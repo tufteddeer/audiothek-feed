@@ -42,12 +42,23 @@ pub async fn fetch_feed(variables: program_set::Variables) -> anyhow::Result<Fee
         .collect();
 
     let modified = DateTime::parse_from_rfc3339(&program_set.last_item_modified.unwrap()).unwrap();
-    let atom_feed = FeedBuilder::default()
+    let mut atom_feed = FeedBuilder::default()
         .title(program_set.title)
         .entries(entries)
         .id(program_set.id)
         .updated(modified)
         .build();
+
+    atom_feed.logo = program_set
+        .image
+        .as_ref()
+        .and_then(|image| image.url.clone())
+        .map(|url| url.replace("{width}", "512"));
+
+    atom_feed.icon = program_set
+        .image
+        .and_then(|image| image.url)
+        .map(|url| url.replace("{width}", "255"));
 
     Ok(atom_feed)
 }

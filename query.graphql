@@ -6,6 +6,9 @@ query ProgramSet($id: ID!) {
     id
     lastItemModified
 
+    image {
+      url
+    }
     items {
       nodes {
         title
