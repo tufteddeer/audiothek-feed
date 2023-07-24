@@ -20,8 +20,7 @@ async fn main() -> anyhow::Result<()> {
     println!("Listening on http://{socket}");
     axum::Server::bind(&socket.parse().unwrap())
         .serve(app.into_make_service())
-        .await
-        .unwrap();
+        .await?;
 
     Ok(())
 }
