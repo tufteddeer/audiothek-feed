@@ -1,6 +1,6 @@
 use audiothek::program_set;
 use axum::{
-    extract::{Path, Query},
+    extract::{Host, Path, Query},
     routing::get,
     Router,
 };
@@ -31,7 +31,10 @@ async fn index_handler() -> axum::response::Response<String> {
 }
 
 /// Serves the HTML UI with show metadata and url
-async fn feed_info_view(id: Query<FeedQuery>) -> axum::response::Response<String> {
+async fn feed_info_view(
+    Host(hostname): Host,
+    id: Query<FeedQuery>,
+) -> axum::response::Response<String> {
     let meta = audiothek::fetch_metadata(audiothek::program_metadata::Variables {
         id: id.0.id.clone(),
     })
@@ -39,7 +42,7 @@ async fn feed_info_view(id: Query<FeedQuery>) -> axum::response::Response<String
     .unwrap();
 
     let mut context = Context::new();
-    context.insert("url", &format!("/feed/{}", id.0.id));
+    context.insert("url", &format!("{hostname}/feed/{}", id.0.id));
     context.insert("title", &meta.title);
 
     if let Some(url) = meta.image.and_then(|img| img.url) {
