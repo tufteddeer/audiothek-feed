@@ -28,7 +28,9 @@ async fn get_atom_feed(Path(id): Path<String>) -> axum::response::Response<Strin
 }
 
 async fn index_handler() -> axum::response::Response<String> {
-    axum::response::Response::new(include_str!("../frontend/index.html").to_string())
+    axum::response::Response::new(
+        include_str!(concat!(env!("FRONTEND_DIR"), "/index.html")).to_string(),
+    )
 }
 
 const STATIC_FILES: [&str; 1] = ["/style.css"];
@@ -63,7 +65,7 @@ lazy_static! {
 
         if let Err(e) = tera.add_raw_template(
             "feed_url.html",
-            include_str!("../frontend/feed_info_view.html"),
+            include_str!(concat!(env!("FRONTEND_DIR"), "/feed_info_view.html")),
         ) {
             println!("Parsing error(s): {}", e);
             ::std::process::exit(1);
