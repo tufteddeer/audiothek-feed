@@ -1,8 +1,23 @@
 use audiothek::program_set;
-use axum::{extract::Path, routing::get, Router};
+use axum::{
+    extract::{Path, Query},
+    routing::get,
+    Router,
+};
+use lazy_static::lazy_static;
+use simple_logger::SimpleLogger;
 
 mod audiothek;
 
+use serde::Deserialize;
+use tera::{Context, Tera};
+
+#[derive(Deserialize, Debug)]
+struct FeedQuery {
+    id: String,
+}
+
+/// Serves the XML Atom feed
 async fn get_atom_feed(Path(id): Path<String>) -> axum::response::Response<String> {
     let feed = audiothek::fetch_feed(program_set::Variables { id })
         .await
@@ -11,9 +26,56 @@ async fn get_atom_feed(Path(id): Path<String>) -> axum::response::Response<Strin
     axum::response::Response::new(feed.to_string())
 }
 
+async fn index_handler() -> axum::response::Response<String> {
+    axum::response::Response::new(include_str!("../index.html").to_string())
+}
+
+/// Serves the HTML UI with show metadata and url
+async fn feed_info_view(id: Query<FeedQuery>) -> axum::response::Response<String> {
+    let meta = audiothek::fetch_metadata(audiothek::program_metadata::Variables {
+        id: id.0.id.clone(),
+    })
+    .await
+    .unwrap();
+
+    let mut context = Context::new();
+    context.insert("url", &format!("/feed/{}", id.0.id));
+    context.insert("title", &meta.title);
+
+    if let Some(url) = meta.image.and_then(|img| img.url) {
+        context.insert("image", &audiothek::image_url(&url, 512));
+    }
+
+    let res = TEMPLATES.render("feed_url.html", &context).unwrap();
+
+    axum::response::Response::new(res)
+}
+
+lazy_static! {
+    pub static ref TEMPLATES: Tera = {
+        let mut tera = Tera::default();
+
+        if let Err(e) = tera.add_raw_template(
+            "feed_url.html",
+            include_str!("../templates/feed_info_view.html"),
+        ) {
+            println!("Parsing error(s): {}", e);
+            ::std::process::exit(1);
+        }
+
+        tera.autoescape_on(vec![".html"]);
+        tera
+    };
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let app = Router::new().route("/feed/:id", get(get_atom_feed));
+    SimpleLogger::new().init()?;
+
+    let app = Router::new()
+        .route("/feed/:id", get(get_atom_feed))
+        .route("/", get(index_handler))
+        .route("/feed-info", get(feed_info_view));
 
     let socket = "0.0.0.0:3000";
 

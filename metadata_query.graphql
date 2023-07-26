@@ -1,0 +1,11 @@
+query ProgramMetadata($id: ID!) {
+  programSet(id: $id) {
+    title
+    id
+    
+    image {
+      url
+    }
+    
+  }
+}

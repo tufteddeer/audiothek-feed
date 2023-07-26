@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Audiothek Feed</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.4.0/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://unpkg.com/htmx.org@1.9.3"
+        integrity="sha384-lVb3Rd/Ca0AxaoZg5sACe8FJKF0tnUgR2Kd7ehUOG5GCcROv5uBIZsOqovBAcWua"
+        crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+
+    <div class="hero min-h-screen bg-base-200">
+        <div class="hero-content text-center">
+            <div class="max-w-md">
+                <h1 class="text-5xl font-bold">Audiothek Feed</h1>
+
+                <form hx-get="/feed-info" hx-target="this" hx-swap="outerHTML" class="m-20">
+                    <p>
+                        Enter id below
+                    </p>
+
+                    <input name="id" id="id_text" type="text" placeholder="Type here"
+                        class="input input-bordered input-primary w-full max-w-xs" />
+                    <input type="submit" value="ok" class="btn btn-primary p-5 m-5" />
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
