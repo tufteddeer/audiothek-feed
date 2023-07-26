@@ -1,8 +1,21 @@
-<div>
+<div id="feed_info_view" class="flex flex-col items-center">
     <h2 class="text-2xl font-bold">{{ title }}</h2>
     <img class="rounded-md" src="{{image}}" />
-    <a href="{{ url }}">{{ url }}</a>
-    <button class="btn btn-primary" onclick="copy_url('{{url}}')">Copy</button>
+
+    <label for="feed_url" class="label text-xl">Atom feed</label>
+
+    <div class="join">
+
+        <a id="feed_url" class="join-item input input-bordered flex items-center" href="http://{{ url }}">
+            http://{{ url }}
+
+        </a>
+        <button class="join-item btn btn-primary" onclick="copy_url('{{url}}')">Copy</button>
+
+    </div>
+
+</div>
+
 </div>
 
 <script>

@@ -14,23 +14,36 @@
 </head>
 
 <body>
+    <div class="h-screen">
+        <div class="flex justify-center">
+            <h1 class="text-5xl font-bold">Audiothek Feed</h1>
 
-    <div class="hero min-h-screen bg-base-200">
-        <div class="hero-content text-center">
-            <div class="max-w-md">
-                <h1 class="text-5xl font-bold">Audiothek Feed</h1>
+        </div>
+        <div class="flex justify-center items-center mx-auto">
 
-                <form hx-get="/feed-info" hx-target="this" hx-swap="outerHTML" class="m-20">
-                    <p>
-                        Enter id below
-                    </p>
+            <div class="flex flex-col  ">
 
-                    <input name="id" id="id_text" type="text" placeholder="Type here"
-                        class="input input-bordered input-primary w-full max-w-xs" />
-                    <input type="submit" value="ok" class="btn btn-primary p-5 m-5" />
-                </form>
+                <div class="flex">
+
+                    <form hx-get="/feed-info" hx-target="this" hx-swap="outerHTML" class="">
+
+                        <label for="id_text" class="label">Show ID</label>
+
+                        <div class="join">
+
+                            <input name="id" id="id_text" type="text" placeholder="12642475"
+                                class="join-item input input-bordered input-primary  max-w-xs" />
+                            <input type="submit" value="ok" class="join-item btn btn-primary " />
+                        </div>
+
+                    </form>
+                </div>
             </div>
         </div>
+
+    </div>
+
+
     </div>
 
 </body>
