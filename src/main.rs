@@ -1,7 +1,6 @@
 use audiothek::program_set;
 use axum::{
     extract::{Host, Path, Query},
-    http::HeaderValue,
     routing::get,
     Router,
 };
@@ -32,8 +31,6 @@ async fn index_handler() -> axum::response::Response<String> {
         include_str!(concat!(env!("FRONTEND_DIR"), "/index.html")).to_string(),
     )
 }
-
-const STATIC_FILES: [&str; 1] = ["/style.css"];
 
 /// Serves the HTML UI with show metadata and url
 async fn feed_info_view(
@@ -77,16 +74,9 @@ lazy_static! {
 }
 
 async fn css_file() -> axum::response::Response<String> {
-    let response = axum::response::Response::new(
+    axum::response::Response::new(
         include_str!(concat!(env!("FRONTEND_DIR"), "/style.css")).to_string(),
-    );
-
-    // response
-    //     .headers_mut()
-    //     .insert("content-type", HeaderValue::from_str("text/css").unwrap());
-
-    // response
-    response
+    )
 }
 
 #[tokio::main]
