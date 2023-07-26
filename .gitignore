@@ -6,3 +6,7 @@ result
 .direnv
 
 .vscode
+
+frontend/dist/
+frontend/node_modules
+frontend/style.css

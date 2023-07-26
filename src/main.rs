@@ -1,6 +1,7 @@
 use audiothek::program_set;
 use axum::{
     extract::{Host, Path, Query},
+    http::HeaderValue,
     routing::get,
     Router,
 };
@@ -27,8 +28,10 @@ async fn get_atom_feed(Path(id): Path<String>) -> axum::response::Response<Strin
 }
 
 async fn index_handler() -> axum::response::Response<String> {
-    axum::response::Response::new(include_str!("../index.html").to_string())
+    axum::response::Response::new(include_str!("../frontend/index.html").to_string())
 }
+
+const STATIC_FILES: [&str; 1] = ["/style.css"];
 
 /// Serves the HTML UI with show metadata and url
 async fn feed_info_view(
@@ -60,7 +63,7 @@ lazy_static! {
 
         if let Err(e) = tera.add_raw_template(
             "feed_url.html",
-            include_str!("../templates/feed_info_view.html"),
+            include_str!("../frontend/feed_info_view.html"),
         ) {
             println!("Parsing error(s): {}", e);
             ::std::process::exit(1);
@@ -71,14 +74,30 @@ lazy_static! {
     };
 }
 
+async fn css_file() -> axum::response::Response<String> {
+    let response = axum::response::Response::new(
+        include_str!(concat!(env!("FRONTEND_DIR"), "/style.css")).to_string(),
+    );
+
+    // response
+    //     .headers_mut()
+    //     .insert("content-type", HeaderValue::from_str("text/css").unwrap());
+
+    // response
+    response
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    println!("{}", env! {"FRONTEND_DIR"});
+
     SimpleLogger::new().init()?;
 
     let app = Router::new()
         .route("/feed/:id", get(get_atom_feed))
         .route("/", get(index_handler))
-        .route("/feed-info", get(feed_info_view));
+        .route("/feed-info", get(feed_info_view))
+        .route("/style.css", get(css_file));
 
     let socket = "0.0.0.0:3000";
 

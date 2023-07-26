@@ -1,0 +1,25 @@
+= Audiothek-Feed
+
+== Building
+
+The project consists of two Parts: The Rust backend and the HTML/HTMX frontend.
+
+=== Using Nix
+
+Both parts are built using a https://nixos.org/[Nix] Flake that provides a package for each one, where the backend package depends on the frontend.
+The result of the frontend build is embedded in the Rust binary at compile time, which locates the artifacts using the `FRONTEND_DIR` environment variable.
+
+[source, bash]
+----
+nix run
+----
+
+=== Using Cargo 
+
+The `devShell` sets `FRONTEND_DIR` to the `frontend` source directory so `cargo run` works as well. If you are not using a Nix shell, you must set `FRONTEND_DIR` manually.
+
+[source, bash]
+----
+nix shell
+cargo run
+----

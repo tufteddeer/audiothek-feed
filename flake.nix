@@ -4,9 +4,11 @@
     naersk.url = "github:nix-community/naersk";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     rust-overlay.url = "github:oxalica/rust-overlay";
+
+    nix-npm-buildpackage.url = "github:serokell/nix-npm-buildpackage";
   };
 
-  outputs = { self, flake-utils, naersk, nixpkgs, rust-overlay }:
+  outputs = { self, flake-utils, naersk, nixpkgs, rust-overlay, nix-npm-buildpackage }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) ];
@@ -27,8 +29,8 @@
 
       in
       rec {
-        # For `nix build` & `nix run`:
-        defaultPackage = naersk'.buildPackage
+
+        packages.backend = naersk'.buildPackage
           {
             src = ./.;
             nativeBuildInputs = with pkgs; [
@@ -36,10 +38,26 @@
             ];
             buildInputs = with pkgs; [
               openssl
+              packages.frontend
             ];
+
+            FRONTEND_DIR = "${packages.frontend}";
 
 
           };
+
+        packages.frontend = nix-npm-buildpackage.legacyPackages.x86_64-linux.buildNpmPackage
+          rec {
+            src = ./frontend;
+            installPhase =
+              ''
+                mkdir $out
+                cp -r *.css *.html $out
+              '';
+            npmBuild = "npm run build";
+          };
+        # For `nix build` & `nix run`:
+        defaultPackage = packages.backend;
 
         # For `nix develop` (optional, can be skipped):
         devShell = pkgs.mkShell
@@ -52,7 +70,7 @@
             buildInputs = with pkgs; [
               openssl
             ];
-
+            FRONTEND_DIR = "../frontend";
 
           };
       }
