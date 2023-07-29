@@ -16,7 +16,7 @@ in
   # ];
 
   options = {
-    services.foundryvtt = {
+    services.audiothekfeed = {
       enable = mkEnableOption ''
         Foundry Virtual Tabletop: A standalone application for online tabletop role-playing games.
       '';
