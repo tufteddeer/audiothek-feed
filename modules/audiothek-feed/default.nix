@@ -41,7 +41,7 @@ in
 
         # Hardening
         apabilityBoundingSet = [ "AF_NETLINK" "AF_INET" "AF_INET6" ];
-        # DeviceAllow = [ "/dev/stdin r" ];
+        DeviceAllow = [ "/dev/stdin r" ];
         DevicePolicy = "strict";
         IPAddressAllow = "localhost";
         LockPersonality = true;
