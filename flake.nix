@@ -30,6 +30,7 @@
       in
       rec {
 
+        nixosModules.audiothekfeed = import ./modules/audiothekfeed self;
         packages.backend = naersk'.buildPackage
           {
             src = ./.;
