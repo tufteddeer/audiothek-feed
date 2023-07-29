@@ -61,7 +61,7 @@ in
         # ReadOnlyPaths = [ "/" ];
         RemoveIPC = true;
         RestrictAddressFamilies = [ "AF_NETLINK" "AF_INET" "AF_INET6" ];
-        # RestrictNamespaces = true;
+        RestrictNamespaces = true;
         RestrictRealtime = true;
         RestrictSUIDSGID = true;
         SystemCallArchitectures = "native";
