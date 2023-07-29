@@ -9,6 +9,7 @@ let
 
   cfg = config.services.audiothekfeed;
 
+  package = flake.defaultPackage.${pkgs.stdenv.hostPlatform.system};
 in
 {
   # imports = [
@@ -43,7 +44,7 @@ in
         User = "audiothekfeed";
         Group = "audiothekfeed";
         Restart = "always";
-        ExecStart = "${lib.getBin cfg.package}/bin/audiothek-rss";
+        ExecStart = "${lib.getBin package}/bin/audiothek-rss";
         StateDirectory = "audiothekfeed";
         StateDirectoryMode = "0750";
 
