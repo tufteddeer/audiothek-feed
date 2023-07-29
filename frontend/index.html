@@ -20,24 +20,24 @@
         </div>
         <div class="flex justify-center items-center mx-auto">
 
-            <div class="flex flex-col  ">
+            <div class="flex flex-col items-center ">
 
-                <div class="flex">
+                <form hx-get="/feed-info" hx-swap="none">
 
-                    <form hx-get="/feed-info" hx-target="this" hx-swap="outerHTML" class="">
+                    <label for="id_text" class="label">Show ID</label>
 
-                        <label for="id_text" class="label">Show ID</label>
+                    <div class="join">
 
-                        <div class="join">
+                        <input name="id" id="id_text" type="text" placeholder="12642475" required
+                            class="join-item input input-bordered input-primary max-w-xs" />
 
-                            <input name="id" id="id_text" type="text" placeholder="12642475" required
-                                class="join-item input input-bordered input-primary  max-w-xs" />
+                        <input type="submit" value="ok" class="join-item btn btn-primary" />
+                    </div>
 
-                            <input type="submit" value="ok" class="join-item btn btn-primary " />
-                        </div>
+                </form>
 
-                    </form>
-                </div>
+                <div id="podcast-result"></div>
+
             </div>
         </div>
 

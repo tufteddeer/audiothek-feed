@@ -1,4 +1,5 @@
-<div id="feed_info_view" class="flex flex-col items-center">
+<!-- this div will replace the "podcast-result" div in index.html -->
+<div hx-swap-oob="outerHTML:#podcast-result" id="feed_info_view" class="flex flex-col items-center mt-9">
     <h2 class="text-2xl font-bold">{{ title }}</h2>
     <img class="rounded-md" src="{{image}}" />
 
@@ -14,12 +15,9 @@
 
     </div>
 
+    <script>
+        function copy_url(url) {
+            navigator.clipboard.writeText(url);
+        }
+    </script>
 </div>
-
-</div>
-
-<script>
-    function copy_url(url) {
-        navigator.clipboard.writeText(url);
-    }
-</script>
