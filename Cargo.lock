@@ -78,7 +78,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "audiothek-rss"
+name = "audiothek-feed"
 version = "0.1.0"
 dependencies = [
  "anyhow",
