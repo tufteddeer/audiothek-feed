@@ -91,7 +91,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/feed-info", get(feed_info_view))
         .route("/style.css", get(css_file));
 
-    let socket = "0.0.0.0:3000";
+    let socket = "0.0.0.0:3123";
 
     println!("Listening on http://{socket}");
     axum::Server::bind(&socket.parse().unwrap())
