@@ -6,12 +6,12 @@ use axum::{
     Router,
 };
 use lazy_static::lazy_static;
-use simple_logger::SimpleLogger;
 
 mod audiothek;
 
 use serde::Deserialize;
 use tera::{Context, Tera};
+use tracing_subscriber::fmt::format::FmtSpan;
 
 #[derive(Deserialize, Debug)]
 struct FeedQuery {
@@ -89,9 +89,10 @@ async fn css_file() -> axum::response::Response<String> {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    println!("{}", env! {"FRONTEND_DIR"});
-
-    SimpleLogger::new().init()?;
+    tracing_subscriber::fmt::fmt()
+        .with_env_filter("hyper=warn,audiothek_feed=trace")
+        .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+        .init();
 
     let app = Router::new()
         .route("/feed/:id", get(get_atom_feed))
@@ -101,7 +102,7 @@ async fn main() -> anyhow::Result<()> {
 
     let socket = "0.0.0.0:3000";
 
-    println!("Listening on http://{socket}");
+    tracing::info!("Listening on http://{socket}");
     axum::Server::bind(&socket.parse().unwrap())
         .serve(app.into_make_service())
         .await?;

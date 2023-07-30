@@ -1,3 +1,5 @@
+use core::fmt;
+
 use anyhow::Result;
 use atom_syndication::{Content, Entry, Feed, Link, Text};
 use chrono::DateTime;
@@ -5,7 +7,7 @@ use graphql_client::{GraphQLQuery, Response};
 use program_set::{ProgramSetProgramSetItemsNodes, ProgramSetProgramSetItemsNodesAudios};
 use serde::de::DeserializeOwned;
 
-use self::program_metadata::ProgramMetadataProgramSet;
+use self::{program_metadata::ProgramMetadataProgramSet, program_set::ProgramSetProgramSet};
 
 const GRAPHQL_ENDPOINT: &str = "https://api.ardaudiothek.de/graphql";
 
@@ -17,7 +19,8 @@ type URL = String;
 #[graphql(
     schema_path = "schema.graphql",
     query_path = "query.graphql",
-    response_derives = "Debug"
+    response_derives = "Debug",
+    variables_derives = "Debug"
 )]
 pub struct ProgramSet;
 
@@ -25,16 +28,18 @@ pub struct ProgramSet;
 #[graphql(
     schema_path = "schema.graphql",
     query_path = "metadata_query.graphql",
-    response_derives = "Debug"
+    response_derives = "Debug",
+    variables_derives = "Debug"
 )]
 /// Get metadata, without episodes
 pub struct ProgramMetadata;
 
 /// Execute GraphQL query with the given variables
+#[tracing::instrument(name = "graphql_query")]
 async fn graphql_query<X, V, T>(variables: V) -> Result<T>
 where
     X: graphql_client::GraphQLQuery<Variables = V>,
-    V: serde::Serialize,
+    V: serde::Serialize + fmt::Debug,
     T: DeserializeOwned,
 {
     let request_body = X::build_query(variables);
@@ -74,16 +79,9 @@ pub async fn fetch_metadata(
 
     Ok(program_meta)
 }
-/// Load the data from the Audiothek, then build the atom feed
-pub async fn fetch_feed(variables: program_set::Variables) -> Result<Feed> {
-    let response_body =
-        graphql_query::<ProgramSet, program_set::Variables, program_set::ResponseData>(variables)
-            .await?;
 
-    let program_set = response_body
-        .program_set
-        .ok_or(anyhow::anyhow!("No result"))?;
-
+#[tracing::instrument(name = "create_feed", skip_all)]
+fn create_feed(program_set: ProgramSetProgramSet) -> Result<Feed> {
     let entries: Vec<Entry> = program_set
         .items
         .nodes
@@ -118,6 +116,20 @@ pub async fn fetch_feed(variables: program_set::Variables) -> Result<Feed> {
         .map(|url| image_url(&url, 256));
 
     Ok(atom_feed)
+}
+
+/// Load the data from the Audiothek, then build the atom feed
+#[tracing::instrument(name = "fetch_feed")]
+pub async fn fetch_feed(variables: program_set::Variables) -> Result<Feed> {
+    let response_body =
+        graphql_query::<ProgramSet, program_set::Variables, program_set::ResponseData>(variables)
+            .await?;
+
+    let program_set = response_body
+        .program_set
+        .ok_or(anyhow::anyhow!("No result"))?;
+
+    create_feed(program_set)
 }
 
 /// Fill the {width} placeholder of an image url
