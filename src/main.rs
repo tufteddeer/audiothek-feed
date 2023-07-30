@@ -1,4 +1,5 @@
 use audiothek::program_set;
+use audiothek_feed::add_template_file;
 use axum::{
     extract::{Host, Path, Query},
     routing::get,
@@ -37,21 +38,31 @@ async fn feed_info_view(
     Host(hostname): Host,
     id: Query<FeedQuery>,
 ) -> axum::response::Response<String> {
-    let meta = audiothek::fetch_metadata(audiothek::program_metadata::Variables {
+    let response = audiothek::fetch_metadata(audiothek::program_metadata::Variables {
         id: id.0.id.clone(),
     })
-    .await
-    .unwrap();
+    .await;
 
     let mut context = Context::new();
-    context.insert("url", &format!("{hostname}/feed/{}", id.0.id));
-    context.insert("title", &meta.title);
 
-    if let Some(url) = meta.image.and_then(|img| img.url) {
-        context.insert("image", &audiothek::image_url(&url, 512));
-    }
+    let template_file = match response {
+        Ok(meta) => {
+            context.insert("url", &format!("{hostname}/feed/{}", id.0.id));
+            context.insert("title", &meta.title);
 
-    let res = TEMPLATES.render("feed_url.html", &context).unwrap();
+            if let Some(url) = meta.image.and_then(|img| img.url) {
+                context.insert("image", &audiothek::image_url(&url, 512));
+            }
+
+            "feed_info_view.html"
+        }
+        Err(e) => {
+            context.insert("message", &e.to_string());
+            "feed_info_error.html"
+        }
+    };
+
+    let res = TEMPLATES.render(template_file, &context).unwrap();
 
     axum::response::Response::new(res)
 }
@@ -60,13 +71,10 @@ lazy_static! {
     pub static ref TEMPLATES: Tera = {
         let mut tera = Tera::default();
 
-        if let Err(e) = tera.add_raw_template(
-            "feed_url.html",
-            include_str!(concat!(env!("FRONTEND_DIR"), "/feed_info_view.html")),
-        ) {
-            println!("Parsing error(s): {}", e);
-            ::std::process::exit(1);
-        }
+        add_template_file!(tera, env!("FRONTEND_DIR"), "feed_info_view.html")
+            .expect("Failedtera,  to add template");
+        add_template_file!(tera, env!("FRONTEND_DIR"), "feed_info_error.html")
+            .expect("Failed to add template");
 
         tera.autoescape_on(vec![".html"]);
         tera

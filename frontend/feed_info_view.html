@@ -1,23 +1,25 @@
-<!-- this div will replace the "podcast-result" div in index.html -->
-<div hx-swap-oob="outerHTML:#podcast-result" id="feed_info_view" class="flex flex-col items-center mt-9">
-    <h2 class="text-2xl font-bold">{{ title }}</h2>
-    <img class="rounded-md" src="{{image}}" />
+<!-- this div will be placed inside the "podcast-result" div in index.html -->
+<div hx-swap-oob="innerHTML:#podcast-result">
+    <div class="flex flex-col items-center mt-9">
+        <h2 class="text-2xl font-bold">{{ title }}</h2>
+        <img class="rounded-md" src="{{image}}" />
 
-    <label for="feed_url" class="label text-xl">Atom feed</label>
+        <label for="feed_url" class="label text-xl">Atom feed</label>
 
-    <div class="join">
+        <div class="join">
 
-        <a id="feed_url" class="join-item input input-bordered flex items-center" href="http://{{ url }}">
-            http://{{ url }}
+            <a id="feed_url" class="join-item input input-bordered flex items-center" href="http://{{ url }}">
+                http://{{ url }}
 
-        </a>
-        <button class="join-item btn btn-primary" onclick="copy_url('{{url}}')">Copy</button>
+            </a>
+            <button class="join-item btn btn-primary" onclick="copy_url('{{url}}')">Copy</button>
 
+        </div>
+
+        <script>
+            function copy_url(url) {
+                navigator.clipboard.writeText(url);
+            }
+        </script>
     </div>
-
-    <script>
-        function copy_url(url) {
-            navigator.clipboard.writeText(url);
-        }
-    </script>
 </div>

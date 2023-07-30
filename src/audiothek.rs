@@ -47,9 +47,15 @@ where
         .await?;
     let response_body: Response<T> = res.json().await?;
 
+    if let Some(errors) = response_body.errors {
+        for err in errors {
+            log::error!("{err}");
+        }
+    }
+
     response_body
         .data
-        .ok_or(anyhow::anyhow!("Failed to fetch program metadata"))
+        .ok_or(anyhow::anyhow!("Failed to run GraphQL query"))
 }
 
 pub async fn fetch_metadata(
@@ -64,7 +70,7 @@ pub async fn fetch_metadata(
 
     let program_meta = response_body
         .program_set
-        .ok_or(anyhow::anyhow!("Failed to fetch program metadata"))?;
+        .ok_or(anyhow::anyhow!("No result"))?;
 
     Ok(program_meta)
 }
@@ -76,7 +82,7 @@ pub async fn fetch_feed(variables: program_set::Variables) -> Result<Feed> {
 
     let program_set = response_body
         .program_set
-        .ok_or(anyhow::anyhow!("Failed to fetch program"))?;
+        .ok_or(anyhow::anyhow!("No result"))?;
 
     let entries: Vec<Entry> = program_set
         .items

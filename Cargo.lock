@@ -87,6 +87,7 @@ dependencies = [
  "chrono",
  "graphql_client",
  "lazy_static",
+ "log",
  "reqwest",
  "serde",
  "serde_json",
