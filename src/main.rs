@@ -18,11 +18,25 @@ struct FeedQuery {
     id: String,
 }
 
+#[derive(Deserialize, Debug)]
+struct FeedPageQuery {
+    cursor: Option<String>,
+}
 /// Serves the XML Atom feed
-async fn get_atom_feed(Path(id): Path<String>) -> axum::response::Response<String> {
-    let feed = audiothek::fetch_feed(program_set::Variables { id })
-        .await
-        .unwrap();
+async fn get_atom_feed(
+    Path(id): Path<String>,
+    query: Query<FeedPageQuery>,
+    Host(host): Host,
+) -> axum::response::Response<String> {
+    let feed = audiothek::fetch_feed(
+        program_set::Variables {
+            id,
+            cursor: query.0.cursor,
+        },
+        host,
+    )
+    .await
+    .unwrap();
 
     axum::response::Response::new(feed.to_string())
 }
@@ -90,7 +104,7 @@ async fn css_file() -> axum::response::Response<String> {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::fmt()
-        .with_env_filter("hyper=warn,audiothek_feed=trace")
+        .with_env_filter("hyper=trace,audiothek_feed=trace")
         .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
         .init();
 

@@ -1,19 +1,25 @@
 use core::fmt;
 
 use anyhow::Result;
-use atom_syndication::{Content, Entry, Feed, Link, Text};
+use atom_syndication::{Content, Entry, Feed, Link, LinkBuilder, Text};
 use chrono::DateTime;
 use graphql_client::{GraphQLQuery, Response};
-use program_set::{ProgramSetProgramSetItemsNodes, ProgramSetProgramSetItemsNodesAudios};
 use serde::de::DeserializeOwned;
 
-use self::{program_metadata::ProgramMetadataProgramSet, program_set::ProgramSetProgramSet};
+use self::{
+    program_metadata::ProgramMetadataProgramSet,
+    program_set::{
+        ProgramSetProgramSet, ProgramSetProgramSetItemsEdgesNode,
+        ProgramSetProgramSetItemsEdgesNodeAudios,
+    },
+};
 
 const GRAPHQL_ENDPOINT: &str = "https://api.ardaudiothek.de/graphql";
 
 type Datetime = String;
 #[allow(clippy::upper_case_acronyms)]
 type URL = String;
+type Cursor = String;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -81,18 +87,19 @@ pub async fn fetch_metadata(
 }
 
 #[tracing::instrument(name = "create_feed", skip_all)]
-fn create_feed(program_set: ProgramSetProgramSet) -> Result<Feed> {
+fn create_feed(program_set: ProgramSetProgramSet, host: String) -> Result<Feed> {
     let entries: Vec<Entry> = program_set
         .items
-        .nodes
+        .edges
         .iter()
+        .map(|edge| &edge.node)
         .map(node_to_episode)
         .collect();
 
     let mut atom_feed = Feed {
         title: program_set.title.into(),
         entries,
-        id: program_set.id,
+        id: program_set.id.clone(),
         ..Default::default()
     };
 
@@ -115,12 +122,33 @@ fn create_feed(program_set: ProgramSetProgramSet) -> Result<Feed> {
         .and_then(|image| image.url.clone())
         .map(|url| image_url(&url, 256));
 
+    let cursor = &program_set
+        .items
+        .edges
+        .first()
+        .as_ref()
+        .and_then(|last| last.cursor.clone());
+
+    if let Some(next_page_cursor) = cursor {
+        let url = format!(
+            "http://{host}/feed/{}?cursor={next_page_cursor}",
+            program_set.id
+        );
+
+        let next_page = LinkBuilder::default()
+            .rel("next".to_string())
+            .href(url)
+            .build();
+
+        atom_feed.links.push(next_page);
+    }
+
     Ok(atom_feed)
 }
 
 /// Load the data from the Audiothek, then build the atom feed
 #[tracing::instrument(name = "fetch_feed")]
-pub async fn fetch_feed(variables: program_set::Variables) -> Result<Feed> {
+pub async fn fetch_feed(variables: program_set::Variables, host: String) -> Result<Feed> {
     let response_body =
         graphql_query::<ProgramSet, program_set::Variables, program_set::ResponseData>(variables)
             .await?;
@@ -129,7 +157,7 @@ pub async fn fetch_feed(variables: program_set::Variables) -> Result<Feed> {
         .program_set
         .ok_or(anyhow::anyhow!("No result"))?;
 
-    create_feed(program_set)
+    create_feed(program_set, host)
 }
 
 /// Fill the {width} placeholder of an image url
@@ -137,7 +165,7 @@ pub fn image_url(url: &str, width: u32) -> String {
     url.replace("{width}", format!("{width}").as_str())
 }
 
-fn audio_to_link(audio: &ProgramSetProgramSetItemsNodesAudios) -> Link {
+fn audio_to_link(audio: &ProgramSetProgramSetItemsEdgesNodeAudios) -> Link {
     Link {
         href: audio.url.clone(),
         rel: "enclosure".to_string(),
@@ -147,7 +175,7 @@ fn audio_to_link(audio: &ProgramSetProgramSetItemsNodesAudios) -> Link {
     }
 }
 
-fn node_to_episode(item: &ProgramSetProgramSetItemsNodes) -> Entry {
+fn node_to_episode(item: &ProgramSetProgramSetItemsEdgesNode) -> Entry {
     let links = item
         .audios
         .as_ref()

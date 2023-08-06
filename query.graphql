@@ -1,6 +1,6 @@
 
 
-query ProgramSet($id: ID!) {
+query ProgramSet($id: ID!, $cursor: Cursor) {
   programSet(id: $id) {
     title
     id
@@ -9,16 +9,19 @@ query ProgramSet($id: ID!) {
     image {
       url
     }
-    items {
-      nodes {
-        title
-        summary
-        id
-        publishDate
-        audios {
+    items(last: 2, before: $cursor) {
+      edges {
+        cursor,
+        node {
           title
-          url
-          mimeType
+          summary
+          id
+          publishDate
+          audios {
+            title
+            url
+            mimeType
+          }
         }
       }
     }
