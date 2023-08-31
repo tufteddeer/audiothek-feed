@@ -74,6 +74,26 @@
             FRONTEND_DIR = "../frontend";
 
           };
+
+        packages.container = pkgs.dockerTools.buildImage {
+          name = "audiothek-feed";
+          tag = "0.1.0";
+
+          copyToRoot = pkgs.buildEnv {
+            name = "image-root";
+            paths = [ pkgs.cacert ];
+          };
+
+          config = {
+            Cmd = [ "${packages.backend}/bin/audiothek-feed" ];
+
+            ExposedPorts = {
+              "3000/tcp" = { };
+            };
+          };
+
+          created = "now";
+        };
       }
     );
 }
