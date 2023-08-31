@@ -1,6 +1,14 @@
 = Audiothek-Feed
 
-== Building
+This project provides Atom feeds for shows in the https://www.ardaudiothek.de/[ARD-Audiothek].
+
+After starting the software, go to http://0.0.0.0:3000 and enter the link to a show or its id (e.g. https://www.ardaudiothek.de/sendung/levels-und-soundtracks/12642475/, the id is the last part of the url, so _12642475_).
+
+You will then get the url of the generated Atom feed which you can use with your podcatcher like any other feed.
+
+Alternatively, you can build the feed url on your own like this: http://0.0.0.0:3000/feed/your_show_id_here
+
+== Building/Running
 
 The project consists of two Parts: The Rust backend and the HTML/HTMX frontend.
 
@@ -20,6 +28,10 @@ The `devShell` sets `FRONTEND_DIR` to the `frontend` source directory so `cargo 
 
 [source, bash]
 ----
-nix shell
+# in ./frontend
+npm install
+npm run build
+
+# in the root directory
 cargo run
 ----
