@@ -2,6 +2,7 @@ use audiothek::program_set;
 use audiothek_feed::add_template_file;
 use axum::{
     extract::{Host, Path, Query},
+    response::IntoResponse,
     routing::get,
     Router,
 };
@@ -12,10 +13,11 @@ mod audiothek;
 use serde::Deserialize;
 use tera::{Context, Tera};
 use tracing_subscriber::fmt::format::FmtSpan;
+use url::Url;
 
 #[derive(Deserialize, Debug)]
 struct FeedQuery {
-    id: String,
+    show: String,
 }
 
 /// Serves the XML Atom feed
@@ -34,20 +36,33 @@ async fn index_handler() -> axum::response::Response<String> {
 }
 
 /// Serves the HTML UI with show metadata and url
-async fn feed_info_view(
-    Host(hostname): Host,
-    id: Query<FeedQuery>,
-) -> axum::response::Response<String> {
-    let response = audiothek::fetch_metadata(audiothek::program_metadata::Variables {
-        id: id.0.id.clone(),
-    })
-    .await;
+async fn feed_info_view(Host(hostname): Host, query: Query<FeedQuery>) -> impl IntoResponse {
+    fn id_from_url(url: &str) -> anyhow::Result<String> {
+        let u = Url::parse(url)?;
+        let mut seg = u
+            .path_segments()
+            .ok_or(anyhow::anyhow!("No path segments"))?;
+        let id = seg.nth(2).ok_or(anyhow::anyhow!("Not enough segments"))?;
+
+        Ok(id.to_string())
+    }
+
+    let show_param = query.0.show;
+
+    let id = if let Ok(id) = id_from_url(&show_param) {
+        id
+    } else {
+        show_param
+    };
+
+    let response =
+        audiothek::fetch_metadata(audiothek::program_metadata::Variables { id: id.clone() }).await;
 
     let mut context = Context::new();
 
     let template_file = match response {
         Ok(meta) => {
-            context.insert("url", &format!("{hostname}/feed/{}", id.0.id));
+            context.insert("url", &format!("{hostname}/feed/{}", id));
             context.insert("title", &meta.title);
 
             if let Some(url) = meta.image.and_then(|img| img.url) {
