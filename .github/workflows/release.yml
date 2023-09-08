@@ -19,7 +19,7 @@ jobs:
         run: nix build .#container
 
       - name: Load image
-        run: docker -i result
+        run: docker load -i result
 
       - name: Push image
         run: docker push ghcr.io/tufteddeer/audiothek-feed:0.1.0
