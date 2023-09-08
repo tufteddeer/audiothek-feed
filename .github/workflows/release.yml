@@ -14,9 +14,6 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v4
-        with:
-          init: none
-          planner: linux
 
       - name: Build image 🐋
         run: nix build .#container
