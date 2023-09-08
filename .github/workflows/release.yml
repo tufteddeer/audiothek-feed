@@ -21,5 +21,8 @@ jobs:
       - name: Load image
         run: docker load -i result
 
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+
       - name: Push image
         run: docker push ghcr.io/tufteddeer/audiothek-feed:0.1.0
