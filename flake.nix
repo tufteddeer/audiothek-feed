@@ -76,7 +76,7 @@
           };
 
         packages.container = pkgs.dockerTools.buildImage {
-          name = "audiothek-feed";
+          name = "ghcr.io/tufteddeer/audiothek-feed";
           tag = "0.1.0";
 
           copyToRoot = pkgs.buildEnv {

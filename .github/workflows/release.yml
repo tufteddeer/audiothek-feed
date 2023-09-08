@@ -4,9 +4,12 @@ on:
   push:
 
 jobs:
-  lints:
+  build:
     name: Build
     runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+      contents: read
     steps:
       - uses: actions/checkout@v3
       - name: Install Nix
@@ -14,5 +17,9 @@ jobs:
         with:
           init: none
           planner: linux
-      # - name: Run `nix build`
-      #   run: nix build .
+
+      - name: Build image 🐋
+        run: nix build .#container
+
+      - name: Push image
+        run: docker push ghcr.io/tufteddeer/audiothek-feed:0.1.0
