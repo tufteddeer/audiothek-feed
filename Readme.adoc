@@ -12,6 +12,13 @@ Alternatively, you can build the feed url on your own like this: http://0.0.0.0:
 
 The project consists of two Parts: The Rust backend and the HTML/HTMX frontend.
 
+=== Using Docker
+
+[source, bash]
+----
+docker run -p 3000:3000 ghcr.io/tufteddeer/audiothek-feed:0.1.0
+----
+
 === Using Nix
 
 Both parts are built using a https://nixos.org/[Nix] Flake that provides a package for each one, where the backend package depends on the frontend.
