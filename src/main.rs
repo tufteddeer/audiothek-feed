@@ -99,7 +99,7 @@ lazy_static! {
 async fn css_file() -> axum::response::Response<String> {
     axum::response::Response::new(
         include_str!(concat!(env!("FRONTEND_DIR"), "/style.css")).to_string(),
-    )
+    ).with_header("Content-Type", "text/css")
 }
 
 #[tokio::main]
