@@ -74,7 +74,7 @@
 
           };
 
-        packages.container = pkgs.dockerTools.buildImage {
+        packages.image = pkgs.dockerTools.buildImage {
           name = "audiothek-feed";
           tag = "0.1.0";
 
