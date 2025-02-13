@@ -1,10 +1,7 @@
 use audiothek::program_set;
 use audiothek_feed::add_template_file;
 use axum::{
-    extract::{Host, Path, Query},
-    response::IntoResponse,
-    routing::get,
-    Router,
+    extract::{Host, Path, Query}, http::HeaderValue, response::IntoResponse, routing::get, Router
 };
 use lazy_static::lazy_static;
 
@@ -97,9 +94,12 @@ lazy_static! {
 }
 
 async fn css_file() -> axum::response::Response<String> {
-    axum::response::Response::new(
+    let mut resp = axum::response::Response::new(
         include_str!(concat!(env!("FRONTEND_DIR"), "/style.css")).to_string(),
-    ).with_header("Content-Type", "text/css")
+    );
+    resp.headers_mut().append("Content-Type", HeaderValue::from_static("text/css"));
+
+    resp
 }
 
 #[tokio::main]
