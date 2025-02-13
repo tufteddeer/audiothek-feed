@@ -76,7 +76,7 @@
 
         packages.image = pkgs.dockerTools.buildImage {
           name = "audiothek-feed";
-          tag = "0.1.0";
+          tag = "0.1.1";
 
           copyToRoot = pkgs.buildEnv {
             name = "image-root";
