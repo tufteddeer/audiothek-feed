@@ -4,11 +4,9 @@
     naersk.url = "github:nix-community/naersk";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     rust-overlay.url = "github:oxalica/rust-overlay";
-
-    nix-npm-buildpackage.url = "github:serokell/nix-npm-buildpackage";
   };
 
-  outputs = { self, flake-utils, naersk, nixpkgs, rust-overlay, nix-npm-buildpackage }:
+  outputs = { self, flake-utils, naersk, nixpkgs, rust-overlay }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) ];
@@ -31,8 +29,7 @@
       rec {
 
         nixosModules.audiothekfeed = import ./modules/audiothekfeed self;
-        packages.backend = naersk'.buildPackage
-          {
+        packages.backend = naersk'.buildPackage {
             src = ./.;
             nativeBuildInputs = with pkgs; [
               pkg-config
@@ -47,9 +44,11 @@
 
           };
 
-        packages.frontend = nix-npm-buildpackage.legacyPackages.x86_64-linux.buildNpmPackage
+        packages.frontend = pkgs.buildNpmPackage
           rec {
+            name = "audiothek-feed-frontend";
             src = ./frontend;
+            npmDepsHash = "sha256-GUQcOZFI7pSt1RD6KQIyUqUttjZhjofDLICn9cE/Vxg=";
             installPhase =
               ''
                 mkdir $out
